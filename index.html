@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANIME PARTY ONLINE</title>
+<style>
+.lobbyShell{width:min(1050px,100%);border:1px solid #3a527c;border-radius:25px;padding:22px;background:linear-gradient(135deg,#101a30f5,#172746f5);box-shadow:0 30px 100px #000b;max-height:94vh;overflow:auto}
+.lobbyHeader,.playerPanelTop,.lobbyFooter{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.roomBadge,.countPill{border:1px solid #47618d;background:#1c2d4c;padding:9px 13px;border-radius:12px;font-size:12px;color:#b9c9e7;letter-spacing:1px}
+.roomBadge b{color:var(--gold);font-size:15px;margin-left:7px}
+.lobbyGrid{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px;margin-top:22px}
+.lobbyHero{padding:24px;border-radius:20px;background:radial-gradient(circle at 90% 10%,#326b80 0,transparent 35%),linear-gradient(145deg,#203c5b,#17213b);border:1px solid #426083;display:flex;flex-direction:column;justify-content:center;min-height:430px}
+.eyebrow{font-size:11px;letter-spacing:2px;color:var(--cyan);font-weight:900}
+.lobbyHero h1{margin:12px 0 6px}.lobbyHero label{font-size:13px;color:#c4d2eb;margin-top:18px}
+.lobbyActions{display:flex;gap:9px}.lobbyActions button{flex:1}
+.lobbyInfo{display:flex;gap:12px;flex-wrap:wrap;color:#b8c9e6;font-size:11px;margin-top:24px}
+.playerPanel{border:1px solid #344a70;background:#101a30;border-radius:20px;padding:18px}
+.playerPanel h2{font-size:19px;margin:0 0 4px}.countPill{color:var(--cyan);font-weight:900}
+.slotGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.playerSlot{display:flex;align-items:center;gap:9px;min-width:0;padding:8px;border:1px solid #293e62;border-radius:12px;background:#17243d}
+.playerSlot span:nth-child(2){min-width:0;flex:1}.playerSlot b{font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.playerSlot small{display:block;color:#91a5c9;font-size:10px;margin-top:2px}
+.playerSlot i{font-style:normal;font-size:9px;color:#7ee2b4;white-space:nowrap}.youSlot{border-color:#39899a;background:#173448}
+.youSlot i{color:var(--gold)}
+.slotAvatar{width:31px;height:31px;flex:0 0 31px;border-radius:10px;display:grid;place-items:center;font-weight:900;color:#111a2c}
+.cyan{background:#58dce5}.pink{background:#ff7ea9}.blue{background:#69b8ff}.gold{background:#ffd166}.violet{background:#a78bfa}.green{background:#78dba0}.orange{background:#ffad69}.mint{background:#8de0d0}.silver{background:#c6d2e2}
+.lobbyBottom{display:flex;gap:9px;margin-top:16px}.lobbyBottom button{flex:1}
+.skinPicker{margin-top:16px;padding:13px;border:1px solid #3b5277;border-radius:15px;background:#0d1830}.skinPicker strong{display:block;font-size:13px;margin-bottom:8px}.skinChoices{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.skinChoice{padding:9px 5px;font-size:11px;border-radius:10px;background:#1b2b49}.skinChoice.active{border-color:var(--cyan);background:#16445a;box-shadow:0 0 0 1px var(--cyan) inset}.skinChoice small{display:block;color:#a9badb;font-size:9px;margin-top:3px}
+.lobbyFooter{margin-top:18px;color:#8398bd;font-size:10px;letter-spacing:1px}
+@media(max-width:760px){.lobbyGrid{grid-template-columns:1fr}.lobbyHero{min-height:unset;padding:18px}.playerPanel{padding:13px}.lobbyShell{padding:13px}.lobbyFooter{font-size:9px}}
+@media(max-width:400px){.slotGrid{grid-template-columns:1fr}.roomBadge{font-size:10px}.lobbyHero h1{font-size:28px}}
+
+:root{--bg:#0b1020;--panel:#141d35;--line:#2b3a60;--cyan:#56e0e6;--pink:#ff6ba6;--gold:#ffd166;--text:#eef4ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,"Segoe UI",sans-serif;overflow:hidden}
+#game{position:fixed;inset:0}canvas{display:block}
+.hud{position:fixed;inset:0;pointer-events:none}
+.top{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.panel{background:#101a31df;border:1px solid var(--line);border-radius:16px;padding:12px 15px;backdrop-filter:blur(10px);box-shadow:0 10px 30px #0005}
+.brand{font-weight:900;letter-spacing:1.4px;color:var(--cyan);font-size:17px}.sub{font-size:12px;color:#a9badb;margin-top:3px}
+.status{font-size:13px;line-height:1.6}.status b{color:var(--gold)}
+.actions{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;pointer-events:auto;flex-wrap:wrap;justify-content:center;width:min(96%,700px)}
+button{border:1px solid #3d5684;background:#1c2b4b;color:white;border-radius:12px;padding:11px 15px;font-weight:700;cursor:pointer;transition:.15s}
+button:hover{transform:translateY(-2px);border-color:var(--cyan);background:#263b64}
+button.primary{background:linear-gradient(135deg,#1f9eae,#5869d8);border:0}
+button.danger{background:#6d294b;border-color:#a94a75}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+#notice{position:absolute;top:100px;left:50%;transform:translateX(-50%);background:#111d36ed;border:1px solid var(--cyan);padding:10px 16px;border-radius:12px;max-width:90%;text-align:center;font-size:14px;display:none}
+#modal{position:fixed;inset:0;background:#050916c9;display:flex;align-items:center;justify-content:center;padding:18px;z-index:5}
+.card{width:min(560px,100%);background:linear-gradient(145deg,#172542,#10182b);border:1px solid #3a4c73;border-radius:24px;padding:26px;box-shadow:0 24px 80px #0009}
+h1{margin:0;color:var(--cyan);font-size:clamp(25px,5vw,38px);letter-spacing:1px}
+h2{margin:0 0 8px;font-size:23px}.lead{color:#b8c7e4;line-height:1.55}
+input{width:100%;padding:13px;border-radius:11px;border:1px solid #40557f;background:#0b1428;color:white;font-size:16px;margin:8px 0 14px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row button{flex:1}
+.small{font-size:12px;color:#9eafcf;line-height:1.5;margin-top:12px}
+#taskBox,#meetingBox{position:fixed;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92%);display:none;pointer-events:auto}
+.tasklist{display:grid;gap:8px;margin:14px 0}.task{padding:10px;border:1px solid #31466e;border-radius:10px;background:#0e1930}
+#meetingBox .votegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+#meetingBox button{width:100%}
+#feed{position:absolute;right:14px;top:104px;width:220px;font-size:12px;color:#c7d5ee;line-height:1.45}
+#feed div{background:#101a31c9;padding:7px 9px;border-radius:8px;margin-bottom:5px}
+@media(max-width:600px){#feed{display:none}.top{top:8px;left:8px;right:8px}.panel{padding:9px 11px}.status{font-size:11px}.actions{bottom:8px}.actions button{padding:10px;font-size:12px}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div class="hud">
+ <div class="top">
+  <div class="panel"><div class="brand">ANIME PARTY ONLINE</div><div class="sub">SOCIAL DEDUCTION • 3D PARTY GAME</div></div>
+  <div class="panel status"><div>ห้อง <b id="roomCode">AP-2048</b> · <span id="playerCount">10/10</span> คน</div><div>บทบาท: <b id="role">ยังไม่เริ่ม</b></div><div>ภารกิจรวม: <b id="progress">0%</b></div></div>
+ </div>
+ <div id="notice"></div>
+ <div id="feed"></div>
+ <div class="actions">
+  <button id="startBtn" class="primary" style="display:none">เริ่มรอบ</button>
+  <button id="taskBtn">ทำภารกิจ (E)</button>
+  <button id="reportBtn">เรียกประชุม</button>
+  <button id="mapBtn">แสดงแผนที่</button>
+ </div>
+</div>
+<div id="taskBox" class="panel">
+ <h2>ภารกิจประจำสถานี</h2><div class="lead">ทำภารกิจให้ครบเพื่อช่วยทีมสะสมความคืบหน้า</div>
+ <div class="tasklist">
+  <div class="task">🔋 เติมพลังงานสำรอง <button onclick="completeTask(this)">ทำภารกิจ</button></div>
+  <div class="task">🛰️ ปรับสัญญาณดาวเทียม <button onclick="completeTask(this)">ทำภารกิจ</button></div>
+  <div class="task">🧪 ตรวจสอบตัวอย่าง <button onclick="completeTask(this)">ทำภารกิจ</button></div>
+ </div><button onclick="closeTask()">ปิด</button>
+</div>
+<div id="meetingBox" class="panel">
+ <h2>📢 ประชุมฉุกเฉิน</h2><div class="lead" id="meetingText">ทุกคนมารวมตัวกัน ใครน่าสงสัย?</div>
+ <div class="votegrid" id="voteGrid"></div>
+ <div style="margin-top:10px"><button onclick="closeMeeting()">ปิดการประชุม</button></div>
+</div>
+<div id="modal">
+ <div class="lobbyShell">
+  <div class="lobbyHeader">
+   <div><div class="brand">ANIME PARTY ONLINE</div><div class="sub">SOCIAL DEDUCTION • 3D PARTY ROOM</div></div>
+   <div class="roomBadge">ROOM <b>AP-2048</b></div>
+  </div>
+  <div class="lobbyGrid">
+   <section class="lobbyHero">
+    <div class="eyebrow">✦ WELCOME TO THE STATION ✦</div>
+    <h1>ห้องพร้อมเล่น</h1>
+    <p class="lead">รวมทีมกับเพื่อน เตรียมตัวออกสำรวจสถานี และตามหาผู้แอบแฝง</p>
+    <label for="nickname">ชื่อผู้เล่นของคุณ</label>
+    <input id="nickname" maxlength="16" placeholder="ใส่ชื่อของคุณ..." value="Player">
+    <div class="lobbyActions">
+     <button class="primary" id="joinBtn">เข้าร่วมล็อบบี้</button>
+     <button id="howBtn">วิธีเล่น</button>
+    </div>
+    <div class="skinPicker"><strong>เลือกสกินตัวละคร</strong><div class="skinChoices" id="skinChoices">
+     <button class="skinChoice active" data-skin="naruto">🍥 Naruto<small>นินจาส้ม</small></button>
+     <button class="skinChoice" data-skin="sasuke">⚡ Sasuke<small>นักดาบสายฟ้า</small></button>
+     <button class="skinChoice" data-skin="sakura">🌸 Sakura<small>นินจาสีชมพู</small></button>
+     <button class="skinChoice" data-skin="gojo">🌀 Gojo<small>ครูผ้าปิดตา</small></button>
+     <button class="skinChoice" data-skin="yuji">👊 Yuji<small>นักเรียนพลังคำสาป</small></button>
+     <button class="skinChoice" data-skin="megumi">🐺 Megumi<small>ผู้ใช้เงา</small></button>
+    </div><div class="small" id="skinNote">เลือกสกินแล้วกดเข้าร่วมล็อบบี้</div></div>
+    <div class="lobbyInfo"><span>🌐 Browser</span><span>👥 สูงสุด 10 คน</span><span>🎮 Free to play</span></div>
+   </section>
+   <section class="playerPanel">
+    <div class="playerPanelTop"><div><h2>ผู้เล่นในห้อง</h2><div class="sub">เตรียมทีมให้พร้อมก่อนเริ่มเกม</div></div><div class="countPill">10 / 10</div></div>
+    <div class="slotGrid" id="slotGrid">
+     <div class="playerSlot youSlot"><span class="slotAvatar cyan">P</span><span><b id="slotYouName">Player</b><small>คุณ · เจ้าของห้อง</small></span><i id="youReady">ยังไม่พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar pink">M</span><span><b>Mika</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar blue">R</span><span><b>Ren</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar gold">A</span><span><b>Aoi</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar violet">H</span><span><b>Haru</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar green">Y</span><span><b>Yuna</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar orange">K</span><span><b>Kaito</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar pink">S</span><span><b>Sora</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar mint">R</span><span><b>Rin</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+     <div class="playerSlot"><span class="slotAvatar silver">A</span><span><b>Akira</b><small>ผู้เล่น</small></span><i>พร้อม</i></div>
+    </div>
+    <div class="lobbyBottom"><button id="readyBtn">✓ พร้อมแล้ว</button><button class="primary" id="launchBtn">เริ่มเกม →</button></div>
+   </section>
+  </div>
+  <div class="lobbyFooter"><span>✦ ANIME PARTY ONLINE</span><span>Prototype v0.4 · Anime skin showcase · Local demo with bots</span></div>
+ </div>
+</div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+const mount=document.getElementById('game');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x91a8c5);scene.fog=new THREE.Fog(0x91a8c5,24,75);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.1,150);
+camera.position.set(0,8,12);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;mount.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdceaff,0x39435a,2));
+const sun=new THREE.DirectionalLight(0xfff2dc,2.3);sun.position.set(-8,16,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(110,110),new THREE.MeshStandardMaterial({color:0x738b83,roughness:1}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const grid=new THREE.GridHelper(110,55,0x91aaa0,0x82998f);grid.position.y=.012;scene.add(grid);
+function box(x,y,z,sx,sy,sz,color,rough=.8){let m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),new THREE.MeshStandardMaterial({color,roughness:rough}));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m}
+function cylinder(x,y,z,r,h,color,segments=20){let m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,segments),new THREE.MeshStandardMaterial({color,roughness:.72}));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m}
+function roof(x,z,w,d,color=0x26364a){let r=box(x,4.1,z,w+1,.35,d+1,color);r.rotation.y=0;for(let i=-1;i<=1;i++)box(x+i*w*.27,3.87,z,w*.24,.12,d*.55,0x3a4b60)}
+// Open campus town: no tall enclosing walls, broad sight lines and several explorable districts.
+box(0,-.18,0,110,.3,110,0x71887d);
+// Main academy buildings
+for(const [x,z,w,d,col] of [[-29,-22,18,13,0xd9d3c1],[27,-25,20,15,0xe4d7bf],[-30,26,17,14,0xd7d0bd],[29,27,18,14,0xdacbb5]]){
+ box(x,2.2,z,w,4.4,d,col);box(x,4.55,z,w+.5,.35,d+.5,0x34445a);roof(x,z,w,d);
+ for(let xx=x-w*.34;xx<=x+w*.34;xx+=w*.34)for(let yy of [1.5,3.2])box(xx,yy,z-d/2-.03,2.2,1.25,.09,0x83b6c5,.3);
+ box(x,1,z+d/2+.06,2.4,2,.15,0x6b4b39);
+}
+// central plaza and paths
+box(0,.01,0,18,.05,18,0xb8b29e);box(0,.025,0,2,.06,30,0xc8c0aa);box(0,.03,0,30,.06,2,0xc8c0aa);
+// Japanese torii gate
+for(let z of [-9,-5]){box(-17,3,z,.55,6,.55,0x9e3e32);box(-13,3,z,.55,6,.55,0x9e3e32)}box(-15,6.1,-7,5.5,.55,.7,0x6c2730);box(-15,6.55,-7,6,.28,.8,0x392c36);
+// Sakura trees and lanterns
+function tree(x,z,pink=true){cylinder(x,1.7,z,.42,3.4,0x594536);for(let i=0;i<6;i++){let a=i*Math.PI/3;let m=new THREE.Mesh(new THREE.SphereGeometry(1.35,12,10),new THREE.MeshStandardMaterial({color:pink?(i%2?0xf2a9c7:0xf7c4d7):0x467b58,roughness:1}));m.position.set(x+Math.cos(a)*.65,3.5+(i%2)*.45,z+Math.sin(a)*.65);m.scale.set(1,.82,1);m.castShadow=true;scene.add(m)}}
+for(let x of [-42,-36,-22,22,36,42])for(let z of [-39,39])tree(x,z,true);
+for(let x of [-43,43])for(let z of [-25,-10,10,25]){cylinder(x,1,z,.13,2,0x273548);let l=new THREE.PointLight(0xffd99a,.6,8);l.position.set(x,2.1,z);scene.add(l);box(x,2,z,.48,.55,.48,0xe4c68c,.4)}
+// Training yard, obstacle blocks and forest edge
+box(0,.08,34,26,.15,17,0x8d9b87);for(let x of [-9,-3,3,9]){box(x,.8,34,1.2,1.5,1.2,0x65766d);box(x,1.65,34,.4,.25,.4,0x9caa9b)}
+for(let x=-48;x<=48;x+=8){tree(x,-47,false);tree(x,47,false)}
+// Task stations and glowing signposts
+const stationPositions=[[-8,0,-3],[8,0,-3],[0,0,16]];
+for(let [x,y,z] of stationPositions){let p=new THREE.PointLight(0x53e7ec,1.4,8);p.position.set(x,2,z);scene.add(p);cylinder(x,.35,z,.8,.7,0x263b4b);cylinder(x,.75,z,.55,.12,0x62dbe0);box(x,1.65,z,.12,1.5,.12,0x6ee7e0)}
+// Stylized, articulated anime people with selectable franchise-inspired outfits.
+const skinDefs={
+ naruto:{label:'Naruto',hair:0xf0a52b,coat:0xe87525,inner:0x243b63,pants:0x26334a,accent:0x263b63,headband:0x34465c,mask:false,spikes:true},
+ sasuke:{label:'Sasuke',hair:0x202432,coat:0x4c4f63,inner:0xe6e8ed,pants:0x262b3b,accent:0x6b83b8,headband:0x303848,spikes:true},
+ sakura:{label:'Sakura',hair:0xe879a4,coat:0xd94d75,inner:0xf4dce5,pants:0x343b58,accent:0x9b385e,headband:0x34465c,spikes:false},
+ gojo:{label:'Gojo',hair:0xe8edf5,coat:0x18243c,inner:0x101827,pants:0x18243c,accent:0x5d9ce8,headband:0x101827,mask:true,spikes:true},
+ yuji:{label:'Yuji',hair:0xe9a18a,coat:0x8f2942,inner:0x20283b,pants:0x20283b,accent:0xd1a2a8,headband:0x20283b,mask:false,spikes:true},
+ megumi:{label:'Megumi',hair:0x171b2b,coat:0x1c2940,inner:0x111a2c,pants:0x182238,accent:0x6d7da0,headband:0x1b263a,mask:false,spikes:true}
+};
+let selectedSkin='naruto';
+function mat(color,rough=.68,metal=0){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal})}
+function limb(parent,from,to,r1,r2,color){let a=new THREE.Vector3(...from),b=new THREE.Vector3(...to),dir=new THREE.Vector3().subVectors(b,a);let mesh=new THREE.Mesh(new THREE.CylinderGeometry(r2,r1,dir.length(),12),mat(color));mesh.position.copy(a).add(b).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());mesh.castShadow=true;parent.add(mesh);return mesh}
+function makeAvatar(name,x,z,skin='naruto',isYou=false){let cfg=skinDefs[skin]||skinDefs.naruto,g=new THREE.Group();const outfit=mat(cfg.coat),dark=mat(cfg.pants),face=mat(0xe9b99c,.86),hairMat=mat(cfg.hair),accent=mat(cfg.accent,.55,.1);
+ // legs and boots
+ for(let side of [-1,1]){let hip=[side*.19,1.05,0],knee=[side*.2,.62,.02],ankle=[side*.22,.18,.06];limb(g,hip,knee,.14,.12,cfg.pants);limb(g,knee,ankle,.12,.095,cfg.pants);let boot=new THREE.Mesh(new THREE.BoxGeometry(.28,.17,.42),mat(0x202633));boot.position.set(side*.22,.11,.13);boot.castShadow=true;g.add(boot)}
+ // torso, collar, jacket panels
+ let torso=new THREE.Mesh(new THREE.CapsuleGeometry(.36,.55,5,12),outfit);torso.position.y=1.42;torso.castShadow=true;g.add(torso);
+ let chest=new THREE.Mesh(new THREE.BoxGeometry(.48,.34,.12),mat(cfg.inner));chest.position.set(0,1.52,.315);g.add(chest);
+ let collar=new THREE.Mesh(new THREE.TorusGeometry(.23,.055,8,18),accent);collar.position.set(0,1.84,0);collar.rotation.x=Math.PI/2;g.add(collar);
+ // arms, cuffs and hands
+ for(let side of [-1,1]){limb(g,[side*.35,1.72,0],[side*.52,1.25,.02],.13,.105,cfg.coat);limb(g,[side*.52,1.25,.02],[side*.48,.96,.12],.105,.085,cfg.coat);let hand=new THREE.Mesh(new THREE.SphereGeometry(.095,10,8),face);hand.position.set(side*.48,.9,.13);g.add(hand);let cuff=new THREE.Mesh(new THREE.CylinderGeometry(.105,.105,.13,12),accent);cuff.position.set(side*.49,1.02,.1);g.add(cuff)}
+ // neck and face
+ let neck=new THREE.Mesh(new THREE.CylinderGeometry(.12,.13,.22,12),face);neck.position.y=1.94;g.add(neck);
+ let head=new THREE.Mesh(new THREE.SphereGeometry(.31,20,16),face);head.scale.set(.92,1.12,.88);head.position.set(0,2.23,.03);head.castShadow=true;g.add(head);
+ // ears
+ for(let side of [-1,1]){let ear=new THREE.Mesh(new THREE.SphereGeometry(.075,10,8),face);ear.position.set(side*.29,2.23,.02);g.add(ear)}
+ // hair cap and anime spikes
+ let cap=new THREE.Mesh(new THREE.SphereGeometry(.325,18,12,0,Math.PI*2,0,Math.PI*.56),hairMat);cap.position.set(0,2.34,.025);g.add(cap);
+ if(cfg.spikes){for(let i=0;i<7;i++){let a=(i/7)*Math.PI*2;let spike=new THREE.Mesh(new THREE.ConeGeometry(.105,.32,7),hairMat);spike.position.set(Math.cos(a)*.22,2.52,Math.sin(a)*.19);spike.rotation.z=-Math.cos(a)*.55;spike.rotation.x=Math.sin(a)*.45;g.add(spike)}}
+ // eyes and eyebrows
+ for(let side of [-1,1]){let eye=new THREE.Mesh(new THREE.SphereGeometry(.035,8,8),mat(0x202334,.3));eye.position.set(side*.105,2.25,.295);eye.scale.set(1,.7,.45);g.add(eye);let brow=new THREE.Mesh(new THREE.BoxGeometry(.09,.025,.025),hairMat);brow.position.set(side*.105,2.31,.29);g.add(brow)}
+ // signature headgear / blindfold / forehead protector
+ if(cfg.mask){let band=new THREE.Mesh(new THREE.BoxGeometry(.57,.16,.12),mat(0x101827));band.position.set(0,2.25,.29);g.add(band);let knot=new THREE.Mesh(new THREE.BoxGeometry(.15,.13,.1),accent);knot.position.set(0,2.25,-.29);g.add(knot)}else{let band=new THREE.Mesh(new THREE.BoxGeometry(.55,.11,.1),mat(cfg.headband));band.position.set(0,2.48,.12);g.add(band);let plate=new THREE.Mesh(new THREE.BoxGeometry(.2,.09,.035),mat(0xb8c5d1,.3,.5));plate.position.set(0,2.48,.19);g.add(plate)}
+ // small character-specific emblem
+ let emblem=new THREE.Mesh(new THREE.CircleGeometry(.085,16),accent);emblem.position.set(.16,1.52,.382);g.add(emblem);
+ g.position.set(x,0,z);scene.add(g);g.userData={name,skin,isYou};return g}
+const botNames=['Mika','Ren','Aoi','Haru','Yuna','Kaito','Sora','Rin','Akira'];
+let you=makeAvatar('Player',0,2,selectedSkin,true);let bots=[];
+const botSkins=['sasuke','sakura','gojo','yuji','megumi','naruto','gojo','sakura','yuji'];
+for(let i=0;i<9;i++){let a=i*Math.PI*2/9;bots.push(makeAvatar(botNames[i],Math.cos(a)*18,Math.sin(a)*15-2,botSkins[i]))}
+// District landmarks provide visual depth and orientation.
+for(let i=0;i<5;i++){let x=-36+i*18;box(x,.7,0,5,1.4,3,0x536c70);box(x,1.45,0,5.3,.18,3.3,0x344c58)}
+const keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')openTask()});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+let started=false,role='ยังไม่เริ่ม',progress=0,done=0,meeting=false,impostorIndex=4,playerName='Player',yaw=0;
+document.querySelectorAll('.skinChoice').forEach(btn=>btn.addEventListener('click',()=>{selectedSkin=btn.dataset.skin;document.querySelectorAll('.skinChoice').forEach(b=>b.classList.toggle('active',b===btn));const cfg=skinDefs[selectedSkin];const oldPos=you.position.clone();scene.remove(you);you=makeAvatar(playerName,oldPos.x,oldPos.z,selectedSkin,true);you.position.copy(oldPos);document.getElementById('skinNote').textContent='เลือกแล้ว: '+cfg.label+' · กดเข้าร่วมล็อบบี้เพื่อยืนยัน';say('เลือกสกิน '+cfg.label+' แล้ว')}));
+const notice=document.getElementById('notice');function say(t){notice.textContent=t;notice.style.display='block';clearTimeout(say.timer);say.timer=setTimeout(()=>notice.style.display='none',2800)}
+function feed(t){let d=document.createElement('div');d.textContent=t;document.getElementById('feed').prepend(d);while(document.getElementById('feed').children.length>5)document.getElementById('feed').lastChild.remove()}
+function updateHUD(){document.getElementById('role').textContent=role;document.getElementById('progress').textContent=progress+'%';document.getElementById('playerCount').textContent='10/10'}
+function start(){if(started)return;started=true;role=Math.random()<.25?'ผู้แอบแฝง':'ลูกเรือ';impostorIndex=Math.floor(Math.random()*9);updateHUD();document.getElementById('startBtn').disabled=true;feed('เริ่มเกมแล้ว! ทุกคนประจำตำแหน่ง');say(role==='ผู้แอบแฝง'?'คุณคือผู้แอบแฝง! อย่าให้ใครจับได้':'คุณคือลูกเรือ! ทำภารกิจให้สำเร็จ');}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('joinBtn').onclick=()=>{playerName=document.getElementById('nickname').value.trim()||'Player';you.userData.name=playerName;document.getElementById('slotYouName').textContent=playerName;document.getElementById('youReady').textContent='เข้าร่วมแล้ว';say('ยินดีต้อนรับ '+playerName+'! กดพร้อมแล้วเพื่อเตรียมตัว');feed(playerName+' เข้าร่วมห้อง');};
+let isReady=false;
+document.getElementById('readyBtn').onclick=()=>{isReady=!isReady;document.getElementById('readyBtn').textContent=isReady?'✓ ยกเลิกความพร้อม':'✓ พร้อมแล้ว';document.getElementById('youReady').textContent=isReady?'พร้อม':'ยังไม่พร้อม';say(isReady?'คุณพร้อมแล้ว!':'ยกเลิกสถานะพร้อม');};
+document.getElementById('launchBtn').onclick=()=>{if(!isReady){say('กด “พร้อมแล้ว” ก่อนเริ่มเกม');return}document.getElementById('modal').style.display='none';start();say('เริ่มเกมแล้ว! ขอให้สนุก');feed('เกมเริ่มต้นแล้ว');};
+document.getElementById('howBtn').onclick=()=>alert('วิธีเล่น\\nWASD: เดิน\\nเมาส์: หมุนมุมมอง\\nE: เปิดภารกิจ\\nทำภารกิจเพื่อเพิ่มความคืบหน้า\\nเรียกประชุมเพื่อโหวตผู้ต้องสงสัย\\nเป้าหมาย: ลูกเรือทำภารกิจให้ครบ ส่วนผู้แอบแฝงพยายามขัดขวาง');
+function openTask(){if(!started){say('กดเริ่มรอบก่อนนะ');return}document.getElementById('taskBox').style.display='block'}
+window.closeTask=()=>document.getElementById('taskBox').style.display='none';
+window.completeTask=(btn)=>{if(btn.disabled)return;btn.disabled=true;btn.textContent='สำเร็จ ✓';done++;progress=Math.min(100,Math.round(done/6*100));updateHUD();feed('ทำภารกิจสำเร็จ ('+progress+'%)');if(progress===100)say('ภารกิจทีมสำเร็จ! ลูกเรือชนะ');};
+document.getElementById('taskBtn').onclick=openTask;
+document.getElementById('reportBtn').onclick=()=>{if(!started){say('เริ่มรอบก่อนเรียกประชุม');return}openMeeting('มีผู้เล่นเรียกประชุมฉุกเฉิน!')};
+function openMeeting(msg){meeting=true;document.getElementById('meetingText').textContent=msg;let grid=document.getElementById('voteGrid');grid.innerHTML='';[playerName,...botNames].forEach((n,i)=>{let b=document.createElement('button');b.textContent='โหวต '+n;b.onclick=()=>{closeMeeting();let ejected=i===impostorIndex+1?'ผู้แอบแฝงถูกโหวตออก!':'ยังไม่พบผู้แอบแฝง';say(ejected);feed('ผลโหวต: '+ejected);};grid.appendChild(b)});document.getElementById('meetingBox').style.display='block'}
+window.closeMeeting=()=>{meeting=false;document.getElementById('meetingBox').style.display='none'};
+document.getElementById('mapBtn').onclick=()=>{camera.position.set(0,58,.01);camera.lookAt(0,0,0);say('มุมมองแผนที่ — กดอีกครั้งเพื่อกลับ');document.getElementById('mapBtn').onclick=()=>{say('กลับสู่มุมมองผู้เล่น');document.getElementById('mapBtn').onclick=()=>{camera.position.set(0,58,.01);camera.lookAt(0,0,0);say('มุมมองแผนที่ — กดอีกครั้งเพื่อกลับ')}}};
+let last=performance.now();
+function animate(now){requestAnimationFrame(animate);let dt=Math.min((now-last)/1000,.04);last=now;
+ if(!meeting&&document.getElementById('modal').style.display==='none'){let speed=keys.shift?8:5;let dx=(keys.d?1:0)-(keys.a?1:0),dz=(keys.s?1:0)-(keys.w?1:0);let len=Math.hypot(dx,dz)||1;you.position.x+=dx/len*speed*dt;you.position.z+=dz/len*speed*dt;you.position.x=THREE.MathUtils.clamp(you.position.x,-49,49);you.position.z=THREE.MathUtils.clamp(you.position.z,-49,49);if(dx||dz)you.rotation.y=Math.atan2(dx,dz);camera.position.lerp(new THREE.Vector3(you.position.x,7.2,you.position.z+10.5),.06);camera.lookAt(you.position.x,1.45,you.position.z)}
+ bots.forEach((b,i)=>{let t=now*.00025+i*2.1;b.position.x=Math.sin(t)*19+(i%3-1)*3;b.position.z=Math.cos(t*.8)*16+(i%2)*3;b.rotation.y=t});
+ renderer.render(scene,camera)}
+requestAnimationFrame(animate);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+updateHUD();
+</script>
+</body></html>
